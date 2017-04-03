@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">MoviesApp</string>
+    <string name="error_message">An error has occurred.</string>
+
+    <string name="pref_movies_Sort_type_label">Movies Sort Type</string>
+
+    <string name="pref_movies_label_top_rated">Top Rated</string>
+
+    <string name="pref_movies_label_most_popular">Most Popular</string>
+
+    <string name="pref_movies_sort_type_key" translatable="false">sortby</string>
+
+    <string name="pref_movies_sort_by_top_rate" translatable="false">top_rated</string>
+
+    <string name="pref_movies_sort_by_most_popular" translatable="false">popular</string>
+
+
+</resources>
