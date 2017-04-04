@@ -13,6 +13,10 @@
     <string name="pref_movies_sort_by_top_rate" translatable="false">top_rated</string>
 
     <string name="pref_movies_sort_by_most_popular" translatable="false">popular</string>
+    <string name="favorite">Favorite</string>
+    <string name="settings">Settings</string>
+    <string name="content_des_movie_poster">the movie poster</string>
+    <string name="content_des_movie_fav">click to add the movie to favorite</string>
 
 
 </resources>
