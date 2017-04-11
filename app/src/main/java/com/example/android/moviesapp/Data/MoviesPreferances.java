@@ -12,7 +12,7 @@ import com.example.android.moviesapp.R;
 
 public class MoviesPreferances {
 
-    public static String getPreferredWeatherLocation(Context context) {
+    public static String getPreferredMovieType(Context context) {
        SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
         String keyForSort = context.getString(R.string.pref_movies_sort_type_key);

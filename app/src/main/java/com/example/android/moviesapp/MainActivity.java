@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +18,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.moviesapp.Data.Movie;
+import com.example.android.moviesapp.Data.Review;
+import com.example.android.moviesapp.Data.Trailer;
 import com.example.android.moviesapp.utilities.NetworkUtils;
 import com.example.android.moviesapp.utilities.OpenMoviesJsonUtils;
 
@@ -26,6 +29,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<Movie>>, MoviesAdapter.MoviesAdapterOnClickHandler, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private RecyclerView mRecyclerView;
+
     private MoviesAdapter mAdapter;
 
     private TextView mErrorMessageDisplay;
@@ -35,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final int LOADER_ID = 0;
 
     private ArrayList<Movie> mMoviesList;
+
     private static boolean PREFERENCES_HAVE_BEEN_UPDATED = false;
 
     @Override
@@ -85,14 +90,36 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 URL MovieRequestUrl = NetworkUtils.getUrl(MainActivity.this);
 
+
                 try {
                     String jsonMoviesResponse = NetworkUtils
                             .getResponseFromHttpUrl(MovieRequestUrl);
 
-                    ArrayList<Movie> JsonMoviesData = OpenMoviesJsonUtils
+                    ArrayList<Movie> jsonMoviesData = OpenMoviesJsonUtils
                             .getMovieContentValuesFromJson(jsonMoviesResponse);
+                    for (int i = 0; i < jsonMoviesData.size(); i++) {
+                        Movie movie = jsonMoviesData.get(i);
+                        int movieId = movie.getmId();
+                        URL trailerUrl = NetworkUtils.buildTrailerUrl(String.valueOf(movieId));
+                        URL reviewUrl = NetworkUtils.buildReviewsUrl(String.valueOf(movieId));
+                        String jsonTrailerResponse = NetworkUtils
+                                .getResponseFromHttpUrl(trailerUrl);
+                        String jsonReviewResponse = NetworkUtils
+                                .getResponseFromHttpUrl(reviewUrl);
+                        if (!TextUtils.isEmpty(jsonReviewResponse)) {
+                            ArrayList<Trailer> jsonTrailerData = OpenMoviesJsonUtils
+                                    .getTreailerListFromJson(jsonTrailerResponse);
+                            jsonMoviesData.get(i).setTrailers(jsonTrailerData);
+                        }
+                        if (!TextUtils.isEmpty(jsonReviewResponse)) {
+                            ArrayList<Review> jsonReviewData = OpenMoviesJsonUtils
+                                    .getReviewsListFromJson(jsonReviewResponse);
+                            jsonMoviesData.get(i).setmReviews(jsonReviewData);
+                        }
 
-                    return JsonMoviesData;
+
+                    }
+                    return jsonMoviesData;
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -148,6 +175,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
             return true;
+        } else if (itemId == R.id.action_favorite) {
+            Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
+            startActivity(intent);
+            return true;
+
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -155,8 +188,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onClick(int position) {
         Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-        Movie x = mMoviesList.get(position);
-        intent.putExtra("Movies", x);
+        Movie movie = mMoviesList.get(position);
+        intent.putExtra("Movies", movie);
+        ArrayList<Trailer> trailers = movie.getTrailers();
+        ArrayList<Review> reviews = movie.getmReviews();
+        intent.putExtra("Reviews", reviews);
+        intent.putExtra("Trailers", trailers);
         startActivity(intent);
     }
 

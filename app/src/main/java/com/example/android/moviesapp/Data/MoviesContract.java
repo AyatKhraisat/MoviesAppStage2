@@ -35,7 +35,9 @@ public class MoviesContract {
 
         public static final String COLUMN_VOTE_AVG = "vote_avg";
 
-        public static Uri buildWeatherUriWithDate(long id) {
+        public static final String COLUMN_MOVIE_ID = "movie_id";
+
+        public static Uri buildBovieUriWithId(long id) {
             return CONTENT_URI.buildUpon()
                     .appendPath(Long.toString(id))
                     .build();

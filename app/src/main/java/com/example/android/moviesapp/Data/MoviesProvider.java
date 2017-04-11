@@ -66,15 +66,15 @@ public class MoviesProvider extends ContentProvider {
                 break;
             case CODE_FAVORITE_MOVIES_WITH_ID:
 
-                String normalizedUtcDateString = uri.getLastPathSegment();
 
-                String[] selectionArguments = new String[]{normalizedUtcDateString};
+
+                String[] selectionArguments = new String[]{uri.getLastPathSegment()};
 
                 retCursor = mOpenHelper.getReadableDatabase().query(
 
                         MoviesContract.FavoriteEntity.TABLE_NAME,
                         projection,
-                        MoviesContract.FavoriteEntity._ID + " = ? ",
+                        MoviesContract.FavoriteEntity.COLUMN_MOVIE_ID+ " = ? ",
                         selectionArguments,
                         null,
                         null,
@@ -121,7 +121,7 @@ public class MoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
+       getContext().getContentResolver().notifyChange(uri, null);
 
         return returnUri;
     }

@@ -16,7 +16,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "movies.db";
 
 
-    private static final int DATABASE_VERSION =1;
+    private static final int DATABASE_VERSION = 1;
 
 
     public MoviesDbHelper(Context context) {
@@ -31,16 +31,16 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
                 "CREATE TABLE " + FavoriteEntity.TABLE_NAME + " (" +
 
 
-                        FavoriteEntity._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                        FavoriteEntity._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 
-                        FavoriteEntity.COLUMN__RELEASE_DATE+ " INTEGER NOT NULL, "+
+                        FavoriteEntity.COLUMN__RELEASE_DATE + " INTEGER NOT NULL, " +
 
-                        FavoriteEntity.COLUMN_TITLE + " TEXT NOT NULL,"+
+                        FavoriteEntity.COLUMN_TITLE + " TEXT NOT NULL," +
 
-                        FavoriteEntity.COLUMN_VOTE_AVG   + " REAL NOT NULL, "+
-                        FavoriteEntity.COLUMN_IMAGE_PATH   + " TEXT NOT NULL, "+
-
-                        FavoriteEntity.COLUMN_OVERVIEW + " TEXT NOT NULL"+
+                        FavoriteEntity.COLUMN_VOTE_AVG + " REAL NOT NULL, " +
+                        FavoriteEntity.COLUMN_IMAGE_PATH + " TEXT NOT NULL, " +
+                        FavoriteEntity.COLUMN_MOVIE_ID + " INTEGER UNIQUE NOT NULL, " +
+                        FavoriteEntity.COLUMN_OVERVIEW + " TEXT NOT NULL" +
                         ");";
 
 

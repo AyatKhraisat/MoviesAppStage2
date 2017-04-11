@@ -17,19 +17,19 @@ import java.util.Scanner;
 import static android.content.ContentValues.TAG;
 
 
-
 public class NetworkUtils {
 
     private static final String MOVIES_DB_BASE_URL = "https://api.themoviedb.org/3/movie/";
     private static final String TOP_RATED_URL = "top_rated";
     private static final String MOST_POPULAR_URL = "popular";
     private static final String API_KEY_PARAM = "api_key";
-
+    private static final String VIDEO_PARAM = "videos";
+    private static final String REVIEW_PARAM = "reviews";
 
 
     public static URL getUrl(Context context) {
 
-        String url = MoviesPreferances.getPreferredWeatherLocation(context);
+        String url = MoviesPreferances.getPreferredMovieType(context);
         if (url.equals(TOP_RATED_URL))
             return buildUrl(TOP_RATED_URL);
         else return buildUrl(MOST_POPULAR_URL);
@@ -52,10 +52,46 @@ public class NetworkUtils {
         }
     }
 
-    public  static String getResponseFromHttpUrl(URL url) throws IOException {
+    public static URL buildTrailerUrl(String movieId) {
+        Uri moviesUri = Uri.parse(MOVIES_DB_BASE_URL).buildUpon().appendPath(movieId).appendPath(VIDEO_PARAM)
+                .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_TOKEN)
+                .build();
+
+
+        try {
+            URL moviesUrl = new URL(moviesUri.toString());
+            Log.v(TAG, "URL: " + moviesUrl);
+            return moviesUrl;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static URL buildReviewsUrl(String movieId) {
+        Uri moviesUri = Uri.parse(MOVIES_DB_BASE_URL).buildUpon().appendPath(movieId).appendPath(REVIEW_PARAM)
+                .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_TOKEN)
+                .appendQueryParameter("language", "en-US")
+                .appendQueryParameter("page", "1")
+                .build();
+
+
+        try {
+            URL moviesUrl = new URL(moviesUri.toString());
+            Log.v(TAG, "URL: " + moviesUrl);
+            return moviesUrl;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getResponseFromHttpUrl(URL url) throws IOException {
 
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
+        urlConnection.setRequestMethod("GET");
+        int responceKey = urlConnection.getResponseCode();
+        if (responceKey == 200) {
             InputStream in = urlConnection.getInputStream();
 
             Scanner scanner = new Scanner(in);
@@ -68,7 +104,9 @@ public class NetworkUtils {
             }
             scanner.close();
             return response;
-        } finally {
+        } else {
             urlConnection.disconnect();
+            return null;
         }
-    }}
+    }
+}

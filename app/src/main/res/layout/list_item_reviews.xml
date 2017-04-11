@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_review_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        tools:text="Wanderless" />
+
+    <TextView
+        android:id="@+id/tv_review_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:padding="10dp"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        tools:text="or so. Science fiction movies are probably my\r\nfavorite genre and I also enjoyed most of Scarlett's movies for the\r\npast 8-9 years so those two factors were a plus for me going in. \r\n\r\nRegarding the whitewashing business, I think its been blown way, WAY\r\nout of proportion by social justice warriors with nothing better to do\r\nthan drag media attention over whatever they're feeling insecure about\r\nthis month/year. For those of you who might be on the fence about\r\nwatching a Caucasian actress in the role that (supposedly) should've\r\nbeen reserved to an Asian actress, please consider this a NON-MATTER\r\nand watch it anyway. The character she is portraying is SUPPOSED to\r\nlook Caucasian/white. It was the same in the source material and even\r\nthe creator of that anime said so in interviews.\r\n\r\nNow, is the movie any good? In my opinion, yes. Yes it was. It wasn't\r\namazing but at the very least entertaining. There is a good amount of\r\npeople who score this a 1/10 because they are butt hurt that the story\r\nwas changed a lot. Please ignore them and see for yourself even if\r\nyou're a fan of the anime and are able to keep an open mind. I think\r\nmaybe I was able to judge it more objectively because I had zero\r\nknowledge about the story in the anime going in, but, if nothing else,\r\nthe movie actually made me want to watch those old ones to compare.\r\n\r\nThe acting - 7.5/10 - Since Scarlett Johansson is the only big name\r\nthat the movie is being marketed alongside, I'd say she did a good job.\r\nAt no point in the movie could I say she didn't belong there. She\r\nplayed the part of cyborg who had difficulty belonging in a human world\r\nvery well. The cast is diverse enough in my opinion, though some of\r\nthem get pretty little screen time.\r\n\r\nThe visuals - 9/10 - If there is one point most critics/viewers are in\r\nalignment concerning this movie, that point is definitely the visuals.\r\nThe movie both looks and feels spectacular, with the futuristic city\r\nlooking like a close-future mix of Blade Runner and TRON. The\r\ncombination of CGI and practical effects looks organic, the movie's\r\npowerful themes of excessive self-augmentation and technology almost\r\nrunning amok represented very well visually.\r\n\r\nSoundtrack - 8/10 - Sometimes pretty subdued, sometimes\r\nalmost-but-not-quite in your face, I found the soundtrack to vary\r\nbetween decent and very good in some moments. It didn't MAKE the movie\r\nbut it enhanced a good deal in my opinion.\r\n\r\nStory - 7/10 - Here is where the good points of the movie kinda start\r\nto run dry. A lot of other people would probably rate it a lot lower,\r\nwith 5 or 4's if they're at least trying to be objective. Yes, the\r\nstory is fairly predictable, and the fact that the movie is only around\r\n100 minutes long doesn't do it any favors either. Here is probably\r\nwhere most of the legitimate hate towards this movie stems from. The\r\ncreators adapted a story that had a lot more depth and philosophical\r\ninsight and turned it into a somewhat generic cyborg coming of age\r\nstory mixed with an evil corporation doing questionable things. The\r\nvillain is also very cookie-cutter and has almost zero depth. HOWEVER,\r\nI do think that concerning this film's particular themes and narrative,\r\na weak villain doesn't hurt it so much since its more about\r\nlosing/gaining your humanity through technology than any bad guy trying\r\nto shoot you.\r\n\r\nWriting/Dialogue - 6/10 - By far the movie's weakest aspect. In fact, I\r\nbelieve if some more meaningful dialogue and character interactions\r\nwere written into this film, it coul" />
+</LinearLayout>

@@ -17,6 +17,8 @@
     <string name="settings">Settings</string>
     <string name="content_des_movie_poster">the movie poster</string>
     <string name="content_des_movie_fav">click to add the movie to favorite</string>
+    <string name="trailer">Trailer</string>
+    <string name="reviews">Reviews</string>
 
 
 </resources>
