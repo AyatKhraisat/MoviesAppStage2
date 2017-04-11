@@ -36,9 +36,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         String stringValue = value.toString();
 
         if (preference instanceof ListPreference) {
-            /* For list preferences, look up the correct display value in */
-            /* the preference's 'entries' list (since they have separate labels/values). */
-            ListPreference listPreference = (ListPreference) preference;
+
+           ListPreference listPreference = (ListPreference) preference;
             int prefIndex = listPreference.findIndexOfValue(stringValue);
             if (prefIndex >= 0) {
                 preference.setSummary(listPreference.getEntries()[prefIndex]);
@@ -48,15 +47,15 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     @Override
     public void onStop() {
         super.onStop();
-        /* Unregister the preference change listener */
-        getPreferenceScreen().getSharedPreferences()
+
+       getPreferenceScreen().getSharedPreferences()
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        /* Register the preference change listener */
+
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
     }

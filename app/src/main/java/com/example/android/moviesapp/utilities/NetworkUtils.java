@@ -25,12 +25,14 @@ public class NetworkUtils {
     private static final String API_KEY_PARAM = "api_key";
     private static final String VIDEO_PARAM = "videos";
     private static final String REVIEW_PARAM = "reviews";
+    private static final String LANGUAGE_PARAM = "language";
+    private static final String PAGES_PARAM = "page";
 
 
     public static URL getUrl(Context context) {
 
-        String url = MoviesPreferances.getPreferredMovieType(context);
-        if (url.equals(TOP_RATED_URL))
+
+        if (MoviesPreferances.isTopRatedPreferredMovieType(context))
             return buildUrl(TOP_RATED_URL);
         else return buildUrl(MOST_POPULAR_URL);
     }
@@ -71,8 +73,8 @@ public class NetworkUtils {
     public static URL buildReviewsUrl(String movieId) {
         Uri moviesUri = Uri.parse(MOVIES_DB_BASE_URL).buildUpon().appendPath(movieId).appendPath(REVIEW_PARAM)
                 .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_TOKEN)
-                .appendQueryParameter("language", "en-US")
-                .appendQueryParameter("page", "1")
+                .appendQueryParameter(LANGUAGE_PARAM, "en-US")
+                .appendQueryParameter(PAGES_PARAM, "1")
                 .build();
 
 
@@ -89,6 +91,7 @@ public class NetworkUtils {
     public static String getResponseFromHttpUrl(URL url) throws IOException {
 
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
         urlConnection.setRequestMethod("GET");
         int responceKey = urlConnection.getResponseCode();
         if (responceKey == 200) {

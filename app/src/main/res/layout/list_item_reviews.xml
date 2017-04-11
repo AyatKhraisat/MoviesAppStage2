@@ -19,8 +19,6 @@
         android:id="@+id/tv_review_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="3"
         android:padding="10dp"
         android:textColor="@android:color/black"
         android:textSize="18sp"

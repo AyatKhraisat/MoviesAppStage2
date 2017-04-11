@@ -2,6 +2,7 @@ package com.example.android.moviesapp;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -18,6 +19,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.moviesapp.Data.Movie;
+import com.example.android.moviesapp.Data.MoviesContract;
+import com.example.android.moviesapp.Data.MoviesPreferances;
 import com.example.android.moviesapp.Data.Review;
 import com.example.android.moviesapp.Data.Trailer;
 import com.example.android.moviesapp.utilities.NetworkUtils;
@@ -36,11 +39,22 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private ProgressBar mLoadingIndicator;
 
-    private static final int LOADER_ID = 0;
+    private static final int ID_NETWORK_LOADER = 0;
+
 
     private ArrayList<Movie> mMoviesList;
 
+
     private static boolean PREFERENCES_HAVE_BEEN_UPDATED = false;
+    private static final int ID_FAVORITE_LOADER = 3;
+    public static final String[] PROJECTION = {
+            MoviesContract.FavoriteEntity.COLUMN_OVERVIEW,
+            MoviesContract.FavoriteEntity.COLUMN_IMAGE_PATH,
+            MoviesContract.FavoriteEntity.COLUMN_VOTE_AVG,
+            MoviesContract.FavoriteEntity.COLUMN_MOVIE_ID,
+            MoviesContract.FavoriteEntity.COLUMN__RELEASE_DATE,
+            MoviesContract.FavoriteEntity.COLUMN_TITLE
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,73 +80,134 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
 
-        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+    if(MoviesPreferances.isMostPopularPreferredMovieType(this)||MoviesPreferances.isTopRatedPreferredMovieType(this))
+        getSupportLoaderManager().initLoader(ID_NETWORK_LOADER, null, this);
+
+        else getSupportLoaderManager().initLoader(ID_FAVORITE_LOADER, null, this);
     }
 
     @Override
     public Loader<ArrayList<Movie>> onCreateLoader(int id, Bundle args) {
-        return new AsyncTaskLoader<ArrayList<Movie>>(MainActivity.this) {
 
-            ArrayList<Movie> mMoviesData = null;
+        switch (id) {
 
-            @Override
-            protected void onStartLoading() {
-                if (mMoviesData != null) {
-                    deliverResult(mMoviesData);
-                } else {
-                    mLoadingIndicator.setVisibility(View.VISIBLE);
-                    forceLoad();
-                }
-            }
+            case ID_FAVORITE_LOADER:
 
-            @Override
-            public ArrayList<Movie> loadInBackground() {
+                return new AsyncTaskLoader<ArrayList<Movie>>(MainActivity.this) {
+                    ArrayList<Movie> mMoviesData = null;
 
-                URL MovieRequestUrl = NetworkUtils.getUrl(MainActivity.this);
-
-
-                try {
-                    String jsonMoviesResponse = NetworkUtils
-                            .getResponseFromHttpUrl(MovieRequestUrl);
-
-                    ArrayList<Movie> jsonMoviesData = OpenMoviesJsonUtils
-                            .getMovieContentValuesFromJson(jsonMoviesResponse);
-                    for (int i = 0; i < jsonMoviesData.size(); i++) {
-                        Movie movie = jsonMoviesData.get(i);
-                        int movieId = movie.getmId();
-                        URL trailerUrl = NetworkUtils.buildTrailerUrl(String.valueOf(movieId));
-                        URL reviewUrl = NetworkUtils.buildReviewsUrl(String.valueOf(movieId));
-                        String jsonTrailerResponse = NetworkUtils
-                                .getResponseFromHttpUrl(trailerUrl);
-                        String jsonReviewResponse = NetworkUtils
-                                .getResponseFromHttpUrl(reviewUrl);
-                        if (!TextUtils.isEmpty(jsonReviewResponse)) {
-                            ArrayList<Trailer> jsonTrailerData = OpenMoviesJsonUtils
-                                    .getTreailerListFromJson(jsonTrailerResponse);
-                            jsonMoviesData.get(i).setTrailers(jsonTrailerData);
+                    @Override
+                    protected void onStartLoading() {
+                        if (mMoviesData != null) {
+                            deliverResult(mMoviesData);
+                        } else {
+                            mLoadingIndicator.setVisibility(View.VISIBLE);
+                            forceLoad();
                         }
-                        if (!TextUtils.isEmpty(jsonReviewResponse)) {
-                            ArrayList<Review> jsonReviewData = OpenMoviesJsonUtils
-                                    .getReviewsListFromJson(jsonReviewResponse);
-                            jsonMoviesData.get(i).setmReviews(jsonReviewData);
-                        }
+                    }
 
+                    @Override
+                    public ArrayList<Movie> loadInBackground() {
+                        ArrayList<Movie> mMoviesData = new ArrayList<>();
+                        Cursor cursor = getContentResolver().query(MoviesContract.FavoriteEntity.CONTENT_URI,
+                                PROJECTION, null, null, MoviesContract.FavoriteEntity._ID);
+                        try {
+                            while (cursor.moveToNext()) {
+                                String title = cursor.getString(cursor.getColumnIndex(MoviesContract.FavoriteEntity.COLUMN_TITLE));
+                                String releaseDate = cursor.getString(cursor.getColumnIndex(MoviesContract.FavoriteEntity.COLUMN__RELEASE_DATE));
+                                String overview = cursor.getString(cursor.getColumnIndex(MoviesContract.FavoriteEntity.COLUMN_OVERVIEW));
+                                double voteAvg = cursor.getDouble(cursor.getColumnIndex(MoviesContract.FavoriteEntity.COLUMN_VOTE_AVG));
+                                String imagePath = cursor.getString(cursor.getColumnIndex(MoviesContract.FavoriteEntity.COLUMN_IMAGE_PATH));
+                                int movieId = cursor.getInt(cursor.getColumnIndex(MoviesContract.FavoriteEntity.COLUMN_MOVIE_ID));
+                                Movie movie = new Movie(imagePath, title, releaseDate, overview, voteAvg, movieId);
+                                mMoviesData.add(movie);
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+
+                        } finally {
+                            cursor.close();
+                        }
+                        return mMoviesData;
 
                     }
-                    return jsonMoviesData;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
 
-            @Override
-            public void deliverResult(ArrayList<Movie> data) {
-                mMoviesData = data;
-                super.deliverResult(data);
-            }
-        };
+                    @Override
+                    public void deliverResult(ArrayList<Movie> data) {
+                        mMoviesData = data;
+                        super.deliverResult(data);
+                    }
+                };
 
+
+            case ID_NETWORK_LOADER:
+                return new AsyncTaskLoader<ArrayList<Movie>>(MainActivity.this) {
+
+                    ArrayList<Movie> mMoviesData = null;
+
+                    @Override
+                    protected void onStartLoading() {
+                        if (mMoviesData != null) {
+                            deliverResult(mMoviesData);
+                        } else {
+                            mLoadingIndicator.setVisibility(View.VISIBLE);
+                            forceLoad();
+                        }
+                    }
+
+                    @Override
+                    public ArrayList<Movie> loadInBackground() {
+
+                        URL MovieRequestUrl = NetworkUtils.getUrl(MainActivity.this);
+
+
+                        try {
+                            String jsonMoviesResponse = NetworkUtils
+                                    .getResponseFromHttpUrl(MovieRequestUrl);
+
+                            ArrayList<Movie> jsonMoviesData = OpenMoviesJsonUtils
+                                    .getMovieContentValuesFromJson(jsonMoviesResponse);
+                            for (int i = 0; i < jsonMoviesData.size(); i++) {
+                                Movie movie = jsonMoviesData.get(i);
+                                int movieId = movie.getmId();
+                                URL trailerUrl = NetworkUtils.buildTrailerUrl(String.valueOf(movieId));
+                                URL reviewUrl = NetworkUtils.buildReviewsUrl(String.valueOf(movieId));
+                                String jsonTrailerResponse = NetworkUtils
+                                        .getResponseFromHttpUrl(trailerUrl);
+                                String jsonReviewResponse = NetworkUtils
+                                        .getResponseFromHttpUrl(reviewUrl);
+                                if (!TextUtils.isEmpty(jsonReviewResponse)) {
+                                    ArrayList<Trailer> jsonTrailerData = OpenMoviesJsonUtils
+                                            .getTrailerListFromJson(jsonTrailerResponse);
+                                    jsonMoviesData.get(i).setTrailers(jsonTrailerData);
+                                }
+                                if (!TextUtils.isEmpty(jsonReviewResponse)) {
+                                    ArrayList<Review> jsonReviewData = OpenMoviesJsonUtils
+                                            .getReviewsListFromJson(jsonReviewResponse);
+                                    jsonMoviesData.get(i).setmReviews(jsonReviewData);
+                                }
+
+
+                            }
+                            return jsonMoviesData;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }
+
+                    @Override
+                    public void deliverResult(ArrayList<Movie> data) {
+                        mMoviesData = data;
+                        super.deliverResult(data);
+                    }
+                };
+
+            default:
+                throw new RuntimeException("Loader Not Implemented: " + id);
+
+        }
     }
 
     @Override
@@ -159,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(Loader<ArrayList<Movie>> loader) {
-
+        mMoviesList = null;
     }
 
     @Override
@@ -175,12 +250,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
             return true;
-        } else if (itemId == R.id.action_favorite) {
-            Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
-            startActivity(intent);
-            return true;
-
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -201,24 +270,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     protected void onStart() {
         super.onStart();
 
-        /*
-         * If the preferences for location or units have changed since the user was last in
-         * MainActivity, perform another query and set the flag to false.
-         *
-         * This isn't the ideal solution because there really isn't a need to perform another
-         * GET request just to change the units, but this is the simplest solution that gets the
-         * job done for now. Later in this course, we are going to show you more elegant ways to
-         * handle converting the units from celsius to fahrenheit and back without hitting the
-         * network again by keeping a copy of the data in a manageable format.
-         */
+
         if (PREFERENCES_HAVE_BEEN_UPDATED) {
-            getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+
+            if (MoviesPreferances.isTopRatedPreferredMovieType(MainActivity.this) ||
+                    MoviesPreferances.isMostPopularPreferredMovieType(MainActivity.this))
+
+                getSupportLoaderManager().restartLoader(ID_NETWORK_LOADER, null, this);
+            else
+                getSupportLoaderManager().restartLoader(ID_FAVORITE_LOADER, null, this);
+
             PREFERENCES_HAVE_BEEN_UPDATED = false;
         }
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
         PREFERENCES_HAVE_BEEN_UPDATED = true;
     }
 

@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.android.moviesapp.Data.Movie;
 import com.example.android.moviesapp.Data.MoviesContract;
+import com.example.android.moviesapp.Data.MoviesPreferances;
 import com.example.android.moviesapp.Data.Review;
 import com.example.android.moviesapp.Data.Trailer;
 import com.squareup.picasso.Picasso;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
     private static final int ID_DETAIL_LOADER = 1;
 
     public static final String[] PROJECTION = {
@@ -66,11 +68,13 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     private LinearLayout mReviewsLayout;
 
+    private final static String BASE_YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+
         mMoviePoster = (ImageView) findViewById(R.id.iv_movie_poster);
 
         mMovieDate = (TextView) findViewById(R.id.tv_movie_release_date);
@@ -89,7 +93,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
         mReviewTextView = (TextView) findViewById(R.id.tv_movie_review_title);
 
-        cursorHasValidData = false;
+
         Intent intent = getIntent();
 
         mMovie = intent.getParcelableExtra("Movies");
@@ -110,22 +114,28 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
         mTrailers = intent.getParcelableArrayListExtra("Trailers");
 
-        if (mTrailers != null) {
-            addTrailers();
+        if (mTrailers != null&&mTrailers.size()>0) {
+            addMovieTrailers();
         } else {
-            mTrailersLayout.setVisibility(View.GONE);
+            mTrailersLayout.setVisibility(View.INVISIBLE);
         }
 
         mReviews = intent.getParcelableArrayListExtra("Reviews");
 
-        if (mReviews != null) {
+        if (mReviews != null&&mReviews.size()>0) {
             addReviews();
         } else {
 
-            mReviewsLayout.setVisibility(View.GONE);
+            mReviewsLayout.setVisibility(View.INVISIBLE);
 
-            mReviewTextView.setVisibility(View.GONE);
+            mReviewTextView.setVisibility(View.INVISIBLE);
         }
+
+       if (MoviesPreferances.isFavoritePreferredMovieType(this))
+
+            mFavariteIcon.setVisibility(View.INVISIBLE);
+
+          cursorHasValidData = false;
 
         getSupportLoaderManager().initLoader(ID_DETAIL_LOADER, null, this);
 
@@ -161,7 +171,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
 
             default:
-                throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                throw new RuntimeException("Loader Not Implemented: "  + loaderId);
         }
     }
 
@@ -184,6 +194,13 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     }
 
+
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
     public void insertMovieIntoFavorites() {
         ContentValues contentValues = new ContentValues();
 
@@ -198,24 +215,29 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         Uri uri = getContentResolver().insert(MoviesContract.FavoriteEntity.CONTENT_URI, contentValues);
 
         if (uri != null) {
-            Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), getString(R.string.added_to_favorite_success), Toast.LENGTH_LONG).show();
         }
-    }
+        else
+            Toast.makeText(getBaseContext(), getString(R.string.added_to_favorite_failed), Toast.LENGTH_LONG).show();
 
+    }
     public void deleteMovieFromFavorites() {
+
         String stringArgs[] = {String.valueOf(mMovie.getmId())};
 
-        getContentResolver().delete(MoviesContract.FavoriteEntity.CONTENT_URI, MoviesContract.FavoriteEntity.COLUMN_MOVIE_ID + "=?", stringArgs);
+        int deltedRow = getContentResolver().delete(MoviesContract.FavoriteEntity.CONTENT_URI, MoviesContract.FavoriteEntity.COLUMN_MOVIE_ID + "=?", stringArgs);
+        String status;
+        if (deltedRow > 0)
+            status = getString(R.string.deleted_from_favorite_success);
+        else
+            status = getString(R.string.deleted_from_favorite_failed);
+
+        Toast.makeText(DetailsActivity.this, status, Toast.LENGTH_LONG).show();
 
         cursorHasValidData = false;
     }
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
-
-    public void addTrailers() {
+    public void addMovieTrailers() {
 
 
         LayoutInflater vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -231,8 +253,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 public void onClick(View v) {
                     Trailer trailer = mTrailers.get(position);
 
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=" + trailer.getKey()));
-                    Intent chooserIntent = Intent.createChooser(intent, "Choose Application to open Trailer:");
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(BASE_YOUTUBE_URL+trailer.getKey()));
+
+                    Intent chooserIntent = Intent.createChooser(intent,getString(R.string.intent_chooser_msg));
 
                     PackageManager packageManager = getPackageManager();
                     List activities = packageManager.queryIntentActivities(chooserIntent,
@@ -257,28 +280,13 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
         for (int i = 0; i < mReviews.size(); i++) {
             viewGroups[i] = (ViewGroup) vi.inflate(R.layout.list_item_reviews, null);
-            final int position = i;
+
             TextView content = (TextView) viewGroups[i].findViewById(R.id.tv_review_content);
             TextView author = (TextView) viewGroups[i].findViewById(R.id.tv_review_author);
             content.setText(mReviews.get(i).getmContent());
             author.setText(mReviews.get(i).getmAuthor() + ":");
 
-            content.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Review review = mReviews.get(position);
 
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(review.getmUrl()));
-
-                    PackageManager packageManager = getPackageManager();
-                    List activities = packageManager.queryIntentActivities(intent,
-                            PackageManager.MATCH_DEFAULT_ONLY);
-                    boolean isIntentSafe = activities.size() > 0;
-                    if (isIntentSafe)
-                        startActivity(intent);
-
-                }
-            });
             mReviewsLayout.addView(viewGroups[i], i, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         }
@@ -298,12 +306,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             Intent intent = new Intent(DetailsActivity.this, SettingsActivity.class);
             startActivity(intent);
             return true;
-        } else if (itemId == R.id.action_favorite) {
-            Intent intent = new Intent(DetailsActivity.this, FavoriteActivity.class);
-            startActivity(intent);
-            return true;
-
-
         }
         return super.onOptionsItemSelected(item);
     }

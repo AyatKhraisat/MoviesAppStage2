@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 
 public class Movie implements Parcelable {
+
     private String mPosterPath;
     private String mOriginalTitle;
     private String mReleaseDate;

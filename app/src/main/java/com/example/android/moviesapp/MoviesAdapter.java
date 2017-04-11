@@ -19,8 +19,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     private Context mcontext;
     private MoviesAdapterOnClickHandler mClickHandler;
     public final static String BASE_POSTER_URL = "http://image.tmdb.org/t/p/w185";
+
     public interface MoviesAdapterOnClickHandler {
-        public void onClick(int position);
+         void onClick(int position);
     }
 
     public MoviesAdapter(Context context, MoviesAdapterOnClickHandler clickHandler) {

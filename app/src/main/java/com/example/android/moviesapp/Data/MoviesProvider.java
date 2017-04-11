@@ -102,9 +102,9 @@ public class MoviesProvider extends ContentProvider {
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
-        // Write URI matching code to identify the match for the tasks directory
-        int match = sUriMatcher.match(uri);
-        Uri returnUri; // URI to be returned
+       int match = sUriMatcher.match(uri);
+
+        Uri returnUri;
 
         switch (match) {
             case CODE_FAVORITE_MOVIES:

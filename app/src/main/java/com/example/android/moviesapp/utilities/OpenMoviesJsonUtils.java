@@ -27,6 +27,9 @@ public class OpenMoviesJsonUtils {
     private static final String OWM_REVIEW_AUTHOR = "author";
     private static final String OWM_REVIEW_URL = "url";
     private static final String OWM_REVIEW_CONTENT = "content";
+    private static final String YOUTUPE_SITE= "YouTube";
+    private static final String TRAILER_TYPE= "Trailer";
+    private static final String OWM_RESULTS="results";
     public static ArrayList<Movie> getMovieContentValuesFromJson(String movieJson)
             throws JSONException {
 
@@ -46,11 +49,11 @@ public class OpenMoviesJsonUtils {
         }
         return resultslist;
     }
-    public static ArrayList<Trailer> getTreailerListFromJson(String movieJson)
+    public static ArrayList<Trailer> getTrailerListFromJson(String movieJson)
             throws JSONException {
 
         JSONObject jsonObject = new JSONObject(movieJson);
-        JSONArray results = jsonObject.getJSONArray("results");
+        JSONArray results = jsonObject.getJSONArray(OWM_RESULTS);
         ArrayList<Trailer> resultslist = new ArrayList<>();
 
 
@@ -61,7 +64,7 @@ public class OpenMoviesJsonUtils {
                 String key = c.getString(OWM_VIDEO_KEY);
                 String site = c.getString(OWM_VIDEO_SITE);
                 String type = c.getString(OWM_VIDEO_TYPE);
-                if(site.equalsIgnoreCase("YouTube")&&type.equalsIgnoreCase("Trailer"))
+                if(site.equalsIgnoreCase(YOUTUPE_SITE)&&type.equalsIgnoreCase(TRAILER_TYPE))
                 resultslist.add(new Trailer(site, key, type));
             }
         catch (Exception e){
@@ -74,7 +77,7 @@ public class OpenMoviesJsonUtils {
             throws JSONException {
 
         JSONObject jsonObject = new JSONObject(movieJson);
-        JSONArray results = jsonObject.getJSONArray("results");
+        JSONArray results = jsonObject.getJSONArray(OWM_RESULTS);
         ArrayList<Review> resultslist = new ArrayList<>();
 
 
@@ -88,7 +91,7 @@ public class OpenMoviesJsonUtils {
                    resultslist.add(new  Review(url,content,author));
             }
             catch (Exception e){
-                Log.d("Trailer","Trailer parciing error");
+                Log.d("Reviews","reviews json error");
             } }
 
         return resultslist;
